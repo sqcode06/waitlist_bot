@@ -10,6 +10,7 @@ from urllib.request import urlopen
 
 import redis.asyncio as redis
 import pickle
+import base64
 
 import telegram.error
 from telegram import *
@@ -47,17 +48,17 @@ async def create_admin_message_entry(chat_id: int):
     raw_all_admin_message_data = await cache.get("admin_message_data")
     all_admin_message_data = {}
     if raw_all_admin_message_data:
-        all_admin_message_data = json.loads(cache.get("admin_message_data"))
+        all_admin_message_data = json.loads(raw_all_admin_message_data)
     all_admin_message_data[str(chat_id)] = {
         "waiting_for_message": 1,
         "waiting_for_button_title": 0,
         "waiting_for_button_url": 0,
-        "message": pickle.dumps(Message(message_id=Message.message_id, chat=Message.chat, date=Message.date)),
-        "message_keyboard": pickle.dumps([]),
+        "message": str(base64.b64encode(pickle.dumps(Message(message_id=Message.message_id, chat=Message.chat, date=Message.date))), "utf-8"),
+        "message_keyboard": str(base64.b64encode(pickle.dumps([])), "utf-8"),
         "button_title": "",
         "button_url": ""
     }
-    await cache.set("admin_message_data", all_admin_message_data)
+    await cache.set("admin_message_data", json.dumps(all_admin_message_data))
 
 
 async def create_user_reg_entry(chat_id: int, ref_id: int):
@@ -80,7 +81,7 @@ async def remove_admin_message_entry(chat_id: int):
     all_admin_message_data = json.loads(await cache.get("admin_message_data"))
     if str(chat_id) in all_admin_message_data.keys():
         del all_admin_message_data[str(chat_id)]
-    await cache.set("admin_message_data", all_admin_message_data)
+    await cache.set("admin_message_data", json.dumps(all_admin_message_data))
 
 
 async def remove_user_reg_entry(chat_id: int):
@@ -196,7 +197,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     global database, db_columns, subscription_requirement_chat_id
     status_channel = (await context.bot.getChatMember(subscription_requirement_chat_id,
                                                       update.effective_user.id)).status
-    if status_channel == ChatMemberStatus.ADMINISTRATOR or status_channel == ChatMemberStatus.OWNER:
+    if status_channel == ChatMemberStatus.OWNER or status_channel == ChatMemberStatus.MEMBER:  # TODO ADMINISTRATOR
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=structures.admin_panel_text,
                                        reply_markup=structures.get_admin_panel_keyboard())
@@ -276,12 +277,12 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if query.data == "admin_message_confirmation_yes":
             button_title = admin_message_data["button_title"]
             button_url = admin_message_data["button_url"]
-            message_keyboard = pickle.loads(admin_message_data["message_keyboard"])
+            message_keyboard = pickle.loads(base64.b64decode(bytes(admin_message_data["message_keyboard"], "utf-8")))
 
             if button_title:
                 message_keyboard.append([InlineKeyboardButton(button_title, url=button_url)])
 
-            admin_message_data["message_keyboard"] = pickle.dumps(message_keyboard)
+            admin_message_data["message_keyboard"] = str(base64.b64encode(pickle.dumps(message_keyboard)), "utf-8")
 
             await context.bot.edit_message_text(text=structures.admin_message_button_question,
                                                 chat_id=update.effective_chat.id,
@@ -298,22 +299,28 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                                                 message_id=query.message.message_id)
             admin_message_data["waiting_for_button_title"] = 1
         if query.data == "admin_message_confirmation_send":
-            message = pickle.loads(admin_message_data["message"])
-            message_keyboard = pickle.loads(admin_message_data["message_keyboard"])
+            message = pickle.loads(base64.b64decode(bytes(admin_message_data["message"], "utf-8")))
+            message_keyboard = pickle.loads(base64.b64decode(bytes(admin_message_data["message_keyboard"], "utf-8")))
 
-            await message.copy(chat_id=update.effective_chat.id, reply_markup=InlineKeyboardMarkup(message_keyboard))
+            await context.bot.copy_message(chat_id=update.effective_chat.id,
+                                           from_chat_id=message.chat_id,
+                                           message_id=message.message_id,
+                                           reply_markup=InlineKeyboardMarkup(message_keyboard))
             await context.bot.send_message(chat_id=update.effective_chat.id,
                                            text=structures.admin_message_confirmation_send_text,
                                            reply_markup=structures.get_admin_message_confirmation_send_keyboard())
         if query.data == "admin_send_message_confirmed":
             user_rows = database.query(users_table, (db_columns[0],), utils.NO_CONDITION,
                                        utils.NO_OPERATOR, False)
-            message = pickle.loads(admin_message_data["message"])
-            message_keyboard = pickle.loads(admin_message_data["message_keyboard"])
+            message = pickle.loads(base64.b64decode(bytes(admin_message_data["message"], "utf-8")))
+            message_keyboard = pickle.loads(base64.b64decode(bytes(admin_message_data["message_keyboard"], "utf-8")))
 
             for user in user_rows:
                 try:
-                    await message.copy(chat_id=user[0], reply_markup=InlineKeyboardMarkup(message_keyboard))
+                    await context.bot.copy_message(chat_id=user[0],
+                                                   from_chat_id=message.chat_id,
+                                                   message_id=message.message_id,
+                                                   reply_markup=InlineKeyboardMarkup(message_keyboard))
                 except telegram.error.Forbidden:
                     print(f"User {user[0]} is unavailable.")
 
@@ -336,7 +343,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                                                 chat_id=update.effective_chat.id,
                                                 message_id=query.message.message_id)
             admin_message_data["waiting_for_button_url"] = 1
-        await cache.set("admin_message_data", admin_message_data)
+        all_admin_message_data[str(update.effective_chat.id)] = admin_message_data
+        await cache.set("admin_message_data", json.dumps(all_admin_message_data))
     if str(update.effective_chat.id) in all_user_reg_data:
         user_reg_data = all_user_reg_data[str(update.effective_chat.id)]
         choose_lang_pattern = re.compile("choose_language_[a-z]*")
@@ -412,7 +420,9 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=structures.admin_send_message_text)
         await create_admin_message_entry(update.effective_chat.id)
-
+    if query.data == "admin_export_csv":
+        database.export_to_csv(users_table, "users.csv")
+        await context.bot.send_document(chat_id=update.effective_chat.id, document=open("users.csv", "rb"))
     if query.data == "return_to_admin_panel":
         await remove_admin_message_entry(update.effective_chat.id)
         await show_admin_panel(update, context, query.message.message_id)
@@ -457,6 +467,9 @@ async def message_handler(update: Update, context: CallbackContext) -> None:
             except HTTPError:
                 await context.bot.send_message(chat_id=chat_id,
                                                text=structures.get_invalid_address_text(structures.Lang(lang)))
+            except TypeError:
+                await context.bot.send_message(chat_id=chat_id,
+                                               text=structures.get_invalid_address_text(structures.Lang(lang)))
 
     raw_all_admin_message_data = await cache.get("admin_message_data")
     all_admin_message_data = {}
@@ -468,7 +481,7 @@ async def message_handler(update: Update, context: CallbackContext) -> None:
         if admin_message_data["waiting_for_message"]:
             message = update.message
             admin_message_data["waiting_for_message"] = 0
-            admin_message_data["message"] = pickle.dumps(message)
+            admin_message_data["message"] = str(base64.b64encode(pickle.dumps(message)), "utf-8")
             await message.copy(chat_id=chat_id)
             await context.bot.send_message(chat_id=chat_id,
                                            text=structures.admin_message_text_confirmation,

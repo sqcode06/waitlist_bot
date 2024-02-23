@@ -117,3 +117,12 @@ class Database:
         query = f"SELECT COUNT(*) FROM {table.name};"
         self._cursor.execute(query)
         return self._cursor.fetchall()[0]
+
+    def export_to_csv(self, table: Table, filename: str) -> None:
+        query = f"SELECT * FROM {table.name};"
+        self._cursor.execute(query)
+        with open(filename, 'w', encoding="utf-8") as file:
+            file.write(','.join(col.name for col in table.cols) + '\n')
+            for row in self._cursor.fetchall():
+                file.write(','.join(str(val) for val in row) + '\n')
+        logging.info(f"Exported {table.name} to {filename}")

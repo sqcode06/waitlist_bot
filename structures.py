@@ -17,9 +17,8 @@ _________
 Выберите язык'''
 
 admin_statistics_loading_text = '''Statistics:
-Total users: ...,
-Total users subscribed: ...,
-Total NFT bought: ... out of ... NFT,
+    Total users: ...,
+    Total users subscribed: ...
 '''
 
 admin_panel_text = "Admin panel"
@@ -327,7 +326,8 @@ def get_return_to_menu_keyboard(lang: Lang, faq: bool) -> InlineKeyboardMarkup:
 def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
         InlineKeyboardButton('Statistics', callback_data="admin_statistics"),
-        InlineKeyboardButton('Send message to users', callback_data="admin_send_message")
+        InlineKeyboardButton('Send message to users', callback_data="admin_send_message"),
+        InlineKeyboardButton('Export database to CSV', callback_data="admin_export_csv")
     ]])
 
 
