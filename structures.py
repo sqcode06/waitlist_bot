@@ -9,7 +9,7 @@ class Lang(Enum):
     RU = "ru"
 
 
-token = "6413387680:AAGREejqioV_S595JCu_NnGiWriGxbQM5FU"
+token = ""  # ENTER TOKEN
 
 choose_language_message = '''Choose language
 _________ 
@@ -83,7 +83,7 @@ Gemz Trade - #1 трейдинг платформа на TON
 - 🏆 Выиграйте WL - Приглашайте друзей по вашей реферальной ссылке, WL будут разыграны между лучшими участниками.
 - 💰 Получайте до 30% от комиссий ваших рефералов, когда они начнут торговать с Gemz.
 
-👉 https://t.me/whitelist_testbot?start={user_id}
+👉 https://t.me/GemzTradeBot?start={user_id}
 '''
     if lang == Lang.EN:
         return f'''💎 Join Gemz Trade Waitlist, win WL and earn TON
@@ -93,7 +93,7 @@ Gemz Trade -  #1 Trading Platform on TON
 - 🏆 Win WL - Invite friends using your referral link, WLs will be raffled between top participants.
 - 💰 Get up to 30% of your referral fees, when they start trading with Gemz.
 
-👉 https://t.me/whitelist_testbot?start={user_id}
+👉 https://t.me/GemzTradeBot?start={user_id}
 '''
 
 
@@ -130,7 +130,7 @@ def get_menu_text(rank: int, user_id: int, lang: Lang) -> str:
 💰 <b>Get up to 30%</b> of your referral fees, when they start trading with Gemz
 
 
-<b>Your Referral Link:</b> <code><b>https://t.me/whitelist_testbot?start={user_id}</b></code>'''
+<b>Your Referral Link:</b> <code><b>https://t.me/GemzTradeBot?start={user_id}</b></code>'''
     if lang == Lang.RU:
         return f'''<b><u>Поздравляем! Вы попали в лист ожидания Gemz Trade.</u></b>
 
@@ -144,7 +144,7 @@ def get_menu_text(rank: int, user_id: int, lang: Lang) -> str:
 💰 <b>Получайте до 30%</b> от комиссий ваших рефералов, когда они начнут торговать с Gemz
 
 
-<b>Ваша реферальная ссылка:</b> <code><b>https://t.me/whitelist_testbot?start={user_id}</b></code>'''
+<b>Ваша реферальная ссылка:</b> <code><b>https://t.me/GemzTradeBot?start={user_id}</b></code>'''
 
 
 def get_ref_dashboard_text(referees: int, user_id: int, lang: Lang) -> str:
@@ -156,7 +156,7 @@ People invited:  {referees}
 
 💰 <b>Get up to 30%</b> of your referral fees, when they start trading with Gemz
 
-<b>Your Referral Link:</b> <code><b>https://t.me/whitelist_testbot?start={user_id}</b></code>'''
+<b>Your Referral Link:</b> <code><b>https://t.me/GemzTradeBot?start={user_id}</b></code>'''
     if lang == Lang.RU:
         return f'''
 Приглашено друзей:  {referees}
@@ -165,7 +165,7 @@ People invited:  {referees}
 
 💰 <b>Получайте до 30%</b> от комиссий ваших рефералов, когда они начнут торговать с Gemz
 
-<b>Ваша реферальная ссылка:</b> <code><b>https://t.me/whitelist_testbot?start={user_id}</b></code>'''
+<b>Ваша реферальная ссылка:</b> <code><b>https://t.me/GemzTradeBot?start={user_id}</b></code>'''
 
 
 def get_faq_text(lang: Lang):

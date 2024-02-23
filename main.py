@@ -197,7 +197,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     global database, db_columns, subscription_requirement_chat_id
     status_channel = (await context.bot.getChatMember(subscription_requirement_chat_id,
                                                       update.effective_user.id)).status
-    if status_channel == ChatMemberStatus.OWNER or status_channel == ChatMemberStatus.MEMBER:  # TODO ADMINISTRATOR
+    if status_channel == ChatMemberStatus.OWNER or status_channel == ChatMemberStatus.ADMINISTRATOR:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=structures.admin_panel_text,
                                        reply_markup=structures.get_admin_panel_keyboard())
