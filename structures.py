@@ -9,7 +9,8 @@ class Lang(Enum):
     RU = "ru"
 
 
-token = ""  # ENTER TOKEN
+token = "6413387680:AAGREejqioV_S595JCu_NnGiWriGxbQM5FU"  # ENTER TOKEN
+tonapi_key = "AEUQULLLKXBKBKQAAAAFEDA7EKEFIR2NCVW2SEZLBSBQYPB5C4MAHYS5ZBUVLFEJMAQRZ5A"
 
 choose_language_message = '''Choose language
 _________ 

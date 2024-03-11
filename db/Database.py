@@ -3,6 +3,7 @@ import sqlite3
 import requests
 from xlsxwriter.workbook import Workbook
 
+import structures
 from db import utils
 
 
@@ -127,15 +128,24 @@ class Database:
         self._cursor.execute(query)
         rows = self._cursor.fetchall()
         address = ""
+        referees = 0
+        headers = {"Authorization": f"Bearer {structures.tonapi_key}"}
         for i, row in enumerate(rows):
             for j, cell in enumerate(row):
                 worksheet.write(i, j, cell)
+                if j == len(row) - 4:
+                    referees = cell
                 if j == len(row) - 1:
                     address = cell
-            response = requests.get(
-                    f"https://tonapi.io/v2/accounts/{address}")
-            response = response.json()
-            balance = response["balance"] * 1E-9
-            worksheet.write(i, len(row), balance)
+            if referees > 0:
+                response = requests.get(
+                    f"https://tonapi.io/v2/accounts/{address}", headers=headers)
+                response = response.json()
+                print(response)
+                if "error" in response:
+                    balance = -1
+                else:
+                    balance = response["balance"] * 1E-9
+                worksheet.write(i, len(row), balance)
         workbook.close()
         logging.info(f"Exported {table.name} to {filename}")

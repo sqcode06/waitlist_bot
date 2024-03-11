@@ -198,7 +198,7 @@ async def admin_panel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     global database, db_columns, subscription_requirement_chat_id
     status_channel = (await context.bot.getChatMember(subscription_requirement_chat_id,
                                                       update.effective_user.id)).status
-    if status_channel == ChatMemberStatus.OWNER or status_channel == ChatMemberStatus.ADMINISTRATOR:
+    if status_channel == ChatMemberStatus.MEMBER or status_channel == ChatMemberStatus.ADMINISTRATOR:
         await context.bot.send_message(chat_id=update.effective_chat.id,
                                        text=structures.admin_panel_text,
                                        reply_markup=structures.get_admin_panel_keyboard())
@@ -393,7 +393,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         lang, address = database.query(users_table, (db_columns[6], db_columns[7]),
                               {db_columns[0]: update.effective_chat.id},
                               [utils.OPERATORS["is"]], False)[0]
-        response = requests.get("https://tonapi.io/v2/nfts/collections/EQCvDh92MohIpsSbA0eH_94cLnvEmvx-Sv2PorNqQRf42Kue/items")
+        headers = {"Authorization": f"Bearer {structures.tonapi_key}"}
+        response = requests.get("https://tonapi.io/v2/nfts/collections/EQCvDh92MohIpsSbA0eH_94cLnvEmvx-Sv2PorNqQRf42Kue/items", headers=headers)
         response = response.json()
         has_nft = False
         with urlopen(f"https://toncenter.com/api/v2/detectAddress?address={urllib.quote_plus(address)}") as addr_response:
