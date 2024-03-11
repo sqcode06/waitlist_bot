@@ -49,6 +49,13 @@ def get_invalid_address_text(lang: Lang) -> str:
         return "Неправильный формат, проверьте адрес вашего кошелька"
 
 
+def get_raw_form_address_text(lang: Lang) -> str:
+    if lang == Lang.EN:
+        return "Enter your TON wallet NOT in raw form"
+    if lang == Lang.RU:
+        return "Введите адрес вашего TON кошелька НЕ в raw формате"
+
+
 def get_valid_address_text(lang: Lang) -> str:
     if lang == Lang.EN:
         return '''Great, last step!
@@ -71,7 +78,7 @@ def get_restart_message(lang: Lang) -> str:
     if lang == Lang.EN:
         return "You are already in the waitlist, click the button below to return to the menu"
     if lang == Lang.RU:
-        return "Вы уже в WL, нажмите на кнопку ниже, чтобы перейти в меню"
+        return "Вы уже в листе ожидания, нажмите на кнопку ниже, чтобы перейти в меню"
 
 
 def get_share_message_text(user_id: int, lang: Lang) -> str:
@@ -100,7 +107,7 @@ Gemz Trade -  #1 Trading Platform on TON
 def get_presale_standby_text(lang: Lang):
     if lang == Lang.EN:
         return '''
-<b><u>The NFT PASS sale has not started yet.</u></b>
+<b><u>GEMZ PASS mint has not started yet.</u></b>
 
 Invite friends, be on TOP - win WL and earn TON from the referrals' trading fees
 
@@ -108,12 +115,50 @@ If you get to win WL, it will appear here
 '''
     if lang == Lang.RU:
         return '''
-<b><u>Продажа NFT PASS еще не началась.</u></b>
+<b><u>Минт GEMZ PASS еще не начался.</u></b>
 
 Приглашайте друзей, будьте в ТОПе - выиграйте WL и зарабатывайте TON с комиссий ваших рефералов
 
 Если вам удастся выиграть WL, он появится здесь
 '''
+
+
+def get_presale_proceed_text(lang: Lang) -> str:
+    if lang == Lang.EN:
+        return '''<b><u>GEMZ PASS MINT</u></b>
+
+🎉 Congratulations, you recieved WL - 20 TON discount and mint priority
+
+Don’t miss the mint on <b>12 March 12:00 UTC!</b>
+
+<b><a href="https://tonraffles.app/nft/launchpad/EQAZO_HuoR3aP7Pmi5kE3h91mmp4J5OwhbMcrkZlwSMVDt3M">MINT HERE!</a></b>'''
+    if lang == Lang.RU:
+        return '''<b><u>Минт GEMZ PASS</u></b>
+
+🎉 Поздравляем, Вы получили WL - скидку на минт 20 ТОН и приоритет в очереди.
+
+Не пропустите минт <b>12 Марта 12:00 UTC!</b>
+
+<b><a href="https://tonraffles.app/nft/launchpad/EQAZO_HuoR3aP7Pmi5kE3h91mmp4J5OwhbMcrkZlwSMVDt3M">МИНТ ТУТ!</a></b>'''
+
+
+def get_presale_fail_text(lang: Lang) -> str:
+    if lang == Lang.EN:
+        return '''<b><u>GEMZ PASS MINT</u></b>
+
+Don’t miss the mint on <b>12 March 12:00 UTC!</b>
+
+Get WL here: https://getgems.io/collection/EQCvDh92MohIpsSbA0eH_94cLnvEmvx-Sv2PorNqQRf42Kue
+
+<b><a href="https://tonraffles.app/nft/launchpad/EQAZO_HuoR3aP7Pmi5kE3h91mmp4J5OwhbMcrkZlwSMVDt3M">MINT HERE!</a></b>'''
+    if lang == Lang.RU:
+        return '''<b><u>Минт GEMZ PASS</u></b>
+
+Не пропустите минт <b>12 Марта 12:00 UTC!</b>
+
+Получить WL можно здесь: https://getgems.io/collection/EQCvDh92MohIpsSbA0eH_94cLnvEmvx-Sv2PorNqQRf42Kue
+
+<b><a href="https://tonraffles.app/nft/launchpad/EQAZO_HuoR3aP7Pmi5kE3h91mmp4J5OwhbMcrkZlwSMVDt3M">МИНТ ТУТ!</a></b>'''
 
 
 def get_menu_text(rank: int, user_id: int, lang: Lang) -> str:
@@ -173,7 +218,7 @@ def get_faq_text(lang: Lang):
         return '''❓<u><b>FAQ</b></u>
 
 <b>1. What is Gemz Trade?</b>
-Gemz Trade - #1 Trading Platform on TON. Features:
+Gemz Trade - #1 Trading App on TON, which includes features such as:
 - Buy/Sell first with fast Buy and Sell functionality 
 - Sniping
 - Advanced PnL
@@ -181,29 +226,37 @@ Gemz Trade - #1 Trading Platform on TON. Features:
 - Limit Orders
 - and others ;)
 
-<b>2. What is waitlist?</b>
-Waitlist - waitlist participants will get access to open beta.
+<b>2. What is Waitlist?</b>
+Waitlist participants will receive:
+- Access to the open beta version
+- Monthly income of up to 30% from trading commissions of invited referrals
+- $GEMZ Airdrop
+- Raffle of 25 WL, between top inviters
+
 
 <b>3. What is WL?</b>
-WL - White List, access to discount on NFT PASS mint. 
+WL (White List) - selected Gemz Trade community members who will receive a 20 TON discount on GEMZ PASS mint. Participate in activities in our community to get WL.
+
 
 <b>4. How can I earn TON?</b>
-- If you invite friends and win WL NFT, you mint NFT PASS with 25% discount and sell higher on Get Gems for example. 
-- Each of your invited friend will pay trading fees when trading and you will get up 30% from it.
+- Each of your invited friends will pay trading fees and you will receive up to 30% of these commissions
+- Invite friends and get $GEMZ Airdrop
 
-<b>5. WL NFT Benefits</b>
-WL NFT provides 25% discount for NFT PASS mint.
 
-<b>6. NFT PASS Benefits</b>
-Gemz Trade NFT PASS will provide exclusive features:
+<b>5. GEMZ PASS Benefits</b>
+GEMZ PASS offers exclusive benefits, including:
 - 0% Trading Fee for EVER
-- Access to closed beta - trade on Gemz first and make cash $ 
-- Private Chat for PASS holders  
-- and more :)
+- Revenue Share from Gemz Trading Fees 
+- Special $GEMZ Airdrop
+- Access to the Private Gemz Trading Chat
+- Access to the Closed Beta
+- Increased Refferal Reward to 40%
+- and much more :)
 
-<b>7. Where to find friends?</b>
+
+<b>6. Where to find friends?</b>
 Send your referral link to chats, channels, twitter, discord, youtube, stories and so on. 
-Try to invite as most as possible to get in top and win WL.'''
+Try to invite as many friends as possible to get to the top and win WL.'''
     if lang == Lang.RU:
         return '''❓<u><b>Частые вопросы</b></u>
 
@@ -217,26 +270,34 @@ Gemz Trade - #1 трейдинг платформа на TON, включающа
 - и другие :)
 
 <b>2. Что такое лист ожидания?</b>
-Лист ожидания - участники листа ожидания получат доступ к открытой бета-версии.
+Участники листа ожидания получат:
+- Доступ к открытой бета-версии
+- Ежемесячный доход до 30% с трейдинг комиссий приглашенных рефералов
+- $GEMZ Airdrop
+- Розыгрыш 25 WL, между теми кто пригласит больше всего друзей
+
 
 <b>3. Что такое WL?</b>
-WL - White List, доступ к скидке на минт NFT PASS. 
+WL (White List) - избранные участники Gemz Trade комьюнити, которые получат скидку 20 TON на минт GEMZ PASS. Участвуйте в активностях в нашем комьюнити, чтобы получить WL.
+
 
 <b>4. Как я могу на этом заработать?</b>
-- Если вы пригласите друзей и выиграете WL NFT, вы сминтите NFT PASS со скидкой 25% и продадите дороже, например, на Get Gems. 
-- Каждый из приглашенных вами друзей будет платить торговые комиссии при трейдинге, а вы будете получать до 30% от этих комиссий.
+- Каждый из приглашенных вами друзей будет платить торговые комиссии при трейдинге, а вы будете получать до 30% от этих комиссий
+- Приглашайте друзей и получите $GEMZ Airdrop
 
-<b>5. Что дает WL NFT?</b>
-WL NFT предоставляет 25% скидку на минт NFT PASS.
 
-<b>6. Что дает NFT PASS?</b>
-Gemz Trade NFT PASS предоставит эксклюзивные возможности:
-- 0% комиссии за трейдинг НАВСЕГДА
-- Доступ к закрытой бета-версии - торгуйте на Gemz первыми и зарабатывайте кэш $
-- Приватный чат для владельцев NFT PASS  
+<b>5. Что дает GEMZ PASS</b>
+GEMZ PASS предоставит эксклюзивные возможности:
+- 0% Трейдинг комиссий НАВСЕГДА
+- Особый $GEMZ Airdrop
+- Ежемесячный доход с торговых комиссий Gemz
+- Доступ к закрытой бета-версии
+- Повышенное вознаграждение за рефералов до 40%
+- Доступ к приватному чату трейдеров
 - и многое другое :)
 
-<b>7. Где найти друзей?</b>
+
+<b>6. Где найти друзей?</b>
 Опубликуйте свою реферальную ссылку в чатах, каналах, twitter, discord, youtube, stories и так далее. 
 Постарайтесь пригласить как можно больше друзей, чтобы попасть в топ и выиграть WL.'''
 
@@ -287,7 +348,7 @@ def get_menu_keyboard(user_id: int, lang: Lang) -> InlineKeyboardMarkup:
             [InlineKeyboardButton('Share Referral Link',
                                   url=f"https://t.me/share/url?url= &text={urllib.parse.quote(get_share_message_text(user_id, Lang.EN))}")],
             [InlineKeyboardButton('Referral Dashboard', callback_data="ref_dashboard")],
-            [InlineKeyboardButton('NFT PASS SALE', callback_data="whitelist_presale")],
+            [InlineKeyboardButton('GEMZ PASS SALE', callback_data="whitelist_presale")],
             [InlineKeyboardButton('FAQ', callback_data="faq")]
         ])
     if lang == Lang.RU:
@@ -295,7 +356,7 @@ def get_menu_keyboard(user_id: int, lang: Lang) -> InlineKeyboardMarkup:
             [InlineKeyboardButton('Поделиться реферальной ссылкой',
                                   url=f"https://t.me/share/url?url= &text={urllib.parse.quote(get_share_message_text(user_id, Lang.RU))}")],
             [InlineKeyboardButton('Реферальная сводка', callback_data="ref_dashboard")],
-            [InlineKeyboardButton('NFT PASS SALE', callback_data="whitelist_presale")],
+            [InlineKeyboardButton('GEMZ PASS SALE', callback_data="whitelist_presale")],
             [InlineKeyboardButton('Частые вопросы', callback_data="faq")]
         ])
 

@@ -1,5 +1,7 @@
 import logging
 import sqlite3
+import requests
+from xlsxwriter.workbook import Workbook
 
 from db import utils
 
@@ -118,11 +120,22 @@ class Database:
         self._cursor.execute(query)
         return self._cursor.fetchall()[0]
 
-    def export_to_csv(self, table: Table, filename: str) -> None:
+    def export_to_xlsx(self, table: Table, filename: str) -> None:
+        workbook = Workbook(filename)
+        worksheet = workbook.add_worksheet()
         query = f"SELECT * FROM {table.name};"
         self._cursor.execute(query)
-        with open(filename, 'w', encoding="utf-8") as file:
-            file.write(','.join(col.name for col in table.cols) + '\n')
-            for row in self._cursor.fetchall():
-                file.write(','.join(str(val) for val in row) + '\n')
+        rows = self._cursor.fetchall()
+        address = ""
+        for i, row in enumerate(rows):
+            for j, cell in enumerate(row):
+                worksheet.write(i, j, cell)
+                if j == len(row) - 1:
+                    address = cell
+            response = requests.get(
+                    f"https://tonapi.io/v2/accounts/{address}")
+            response = response.json()
+            balance = response["balance"] * 1E-9
+            worksheet.write(i, len(row), balance)
+        workbook.close()
         logging.info(f"Exported {table.name} to {filename}")

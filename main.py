@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import re
+import requests
 import urllib.parse as urllib
 from collections import OrderedDict
 from operator import itemgetter
@@ -389,15 +390,35 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                                                                                                 True),
                                             parse_mode=ParseMode.HTML)
     if query.data == "whitelist_presale":
-        lang = database.query(users_table, (db_columns[6],),
+        lang, address = database.query(users_table, (db_columns[6], db_columns[7]),
                               {db_columns[0]: update.effective_chat.id},
-                              [utils.OPERATORS["is"]], False)[0][0]
-        await context.bot.edit_message_text(chat_id=update.effective_chat.id,
-                                            message_id=query.message.message_id,
-                                            text=structures.get_presale_standby_text(structures.Lang(lang)),
-                                            reply_markup=structures.get_return_to_menu_keyboard(structures.Lang(lang),
-                                                                                                True),
-                                            parse_mode=ParseMode.HTML)
+                              [utils.OPERATORS["is"]], False)[0]
+        response = requests.get("https://tonapi.io/v2/nfts/collections/EQCvDh92MohIpsSbA0eH_94cLnvEmvx-Sv2PorNqQRf42Kue/items")
+        response = response.json()
+        has_nft = False
+        with urlopen(f"https://toncenter.com/api/v2/detectAddress?address={urllib.quote_plus(address)}") as addr_response:
+            addr_response = json.loads(str(addr_response.read().decode("utf-8")))
+            address = addr_response["result"]["raw_form"]
+        for item in response["nft_items"]:
+            if item["owner"]["address"] == address:
+                has_nft = True
+                break
+        if has_nft:
+            await context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                                message_id=query.message.message_id,
+                                                text=structures.get_presale_proceed_text(structures.Lang(lang)),
+                                                reply_markup=structures.get_return_to_menu_keyboard(
+                                                    structures.Lang(lang),
+                                                    True),
+                                                parse_mode=ParseMode.HTML)
+        else:
+            await context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                                message_id=query.message.message_id,
+                                                text=structures.get_presale_fail_text(structures.Lang(lang)),
+                                                reply_markup=structures.get_return_to_menu_keyboard(
+                                                    structures.Lang(lang),
+                                                    True),
+                                                parse_mode=ParseMode.HTML)
     if query.data == "return_to_menu":
         await show_menu(update, context, query.message.message_id)
     if query.data == "admin_statistics":
@@ -421,8 +442,8 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                                        text=structures.admin_send_message_text)
         await create_admin_message_entry(update.effective_chat.id)
     if query.data == "admin_export_csv":
-        database.export_to_csv(users_table, "users.csv")
-        await context.bot.send_document(chat_id=update.effective_chat.id, document=open("users.csv", "rb"))
+        database.export_to_xlsx(users_table, "users.xlsx")
+        await context.bot.send_document(chat_id=update.effective_chat.id, document=open("users.xlsx", "rb"))
     if query.data == "return_to_admin_panel":
         await remove_admin_message_entry(update.effective_chat.id)
         await show_admin_panel(update, context, query.message.message_id)
@@ -451,7 +472,7 @@ async def message_handler(update: Update, context: CallbackContext) -> None:
         if user_reg_data["waiting_for_address"]:
             lang = user_reg_data["lang"]
             try:
-                with urlopen(f"https://toncenter.com/api/v2/detectAddress?address={urllib.quote_plus(update.message.text)}"):
+                with urlopen(f"https://toncenter.com/api/v2/detectAddress?address={urllib.quote_plus(update.message.text)}") as response:
                     same_address = database.query(users_table, (db_columns[0],),
                                                   {db_columns[7]: update.message.text},
                                                   [utils.OPERATORS['is']], False)
@@ -459,11 +480,16 @@ async def message_handler(update: Update, context: CallbackContext) -> None:
                         await context.bot.send_message(chat_id=chat_id,
                                                        text=structures.get_same_address_exists_text(structures.Lang(lang)))
                     else:
-                        user_reg_data["waiting_for_address"] = 0
-                        user_reg_data["address"] = update.message.text
-                        all_user_reg_data[str(chat_id)] = user_reg_data
-                        await cache.set("user_reg_data", json.dumps(all_user_reg_data))
-                        await address_valid(update, context, chat_id)
+                        response = json.loads(str(response.read().decode("utf-8")))
+                        if response["result"]["given_type"] == "raw_form":
+                            await context.bot.send_message(chat_id=chat_id,
+                                                           text=structures.get_raw_form_address_text(structures.Lang(lang)))
+                        else:
+                            user_reg_data["waiting_for_address"] = 0
+                            user_reg_data["address"] = update.message.text
+                            all_user_reg_data[str(chat_id)] = user_reg_data
+                            await cache.set("user_reg_data", json.dumps(all_user_reg_data))
+                            await address_valid(update, context, chat_id)
             except HTTPError:
                 await context.bot.send_message(chat_id=chat_id,
                                                text=structures.get_invalid_address_text(structures.Lang(lang)))
